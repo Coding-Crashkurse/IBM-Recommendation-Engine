@@ -63,21 +63,20 @@ get_top_articles(10, interactions)
 get_top_article_ids(10, interactions)
 
 
-### Part 3 User-User Based Collaborative Filtering
 
+### Part 3 User-User Based Collaborative Filtering
+# Create user-item-matrix first
 user_item_matrix = interactions.groupby(["user_id", "article_id"]).agg(lambda x: 1).unstack().fillna(0).droplevel(0, axis = 1)
 
-user_item_matrix.iloc[1] * user_item_matrix.iloc[1]
 
+def find_similar_users(user_id, user_item):
+    similarity = {}
+    for user in user_item_matrix.index:
+        similarity[user] = np.dot(user_item_matrix.loc[user_id, :], user_item_matrix.loc[user, :])
+    similarity.pop(user_id)
+    similarity = sorted(similarity.items(), key=lambda x: x[1], reverse=True)
+    most_similar_users = [item[0] for item in similarity]
+    return most_similar_users
 
-similarity = {}
-for user in user_item_matrix.index:
-    similarity[user] = np.dot(user_item_matrix.loc[1, :], user_item_matrix.loc[user, :])
-    #similarity[user] = np.dot(user_item_matrix.iloc[1], user_item_matrix.iloc[user])
-    
-{k: v for k, v in sorted(similarity.items(), key=lambda item: item[1])}
-
-
-
-
+find_similar_users(2, )
 
