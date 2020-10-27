@@ -1,82 +1,25 @@
-import numpy as np
 import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import pickle
+import seaborn as sns
 
-interactions = pd.read_csv("C:/Users/User/Desktop/Fortbildung/Projects/RecommendationEngine/data/user-item-interactions.csv")
-articles = pd.read_csv("C:/Users/User/Desktop/Fortbildung/Projects/RecommendationEngine/data/articles_community.csv")
+df = pd.read_csv("C:/Users/User/Desktop/Fortbildung/Projects/RecommendationEngine/data/user-item-interactions.csv")
+df_content = pd.read_csv("C:/Users/User/Desktop/Fortbildung/Projects/RecommendationEngine/data/articles_community.csv")
+del df['Unnamed: 0']
+del df_content['Unnamed: 0']
+df.head()
 
-counts_per_user = interactions.groupby(["email"]).count()["article_id"]
-counts_per_user.hist()
+### Part I : Exploratory Data Analysis
+df["email"].value_counts()
+sns.displot(data=df["email"].value_counts())
 
-counts_per_user.mean()
-counts_per_user.median()
+count_per_user = df.groupby("email").count()["article_id"]
+median_val = count_per_user.median()
+max_views_per_user = count_per_user.max()
 
-# Find and explore dupicate articles
-duplicates = articles[articles['article_id'].duplicated(keep=False)]
+# 2 Explore and remove duplicates from the df_content dataframe
+duplicates = df_content[df_content["article_id"].duplicated(keep=False)].sort_values(by=["article_id"])
+duplicates
 
-unique_articles = articles.drop_duplicates(subset=["article_id"], keep="first")
-
-# Number of unique articles that have interaction with a user
-interactions["article_id"].nunique()
-# The of unique articles in the dataset
-articles["article_id"].nunique()
-# Number of unique users in the dataset
-interactions["email"].nunique()
-# Number of user-article interactions in the dataset
-interactions.shape[0]
-
-## Most viewed article id
-interactions.groupby(["article_id"], as_index=False).count()
-   
-def email_mapper():
-    coded_dict = dict()
-    cter = 1
-    email_encoded = []
-    
-    for val in interactions['email']:
-        if val not in coded_dict:
-            coded_dict[val] = cter
-            cter+=1
-        
-        email_encoded.append(coded_dict[val])
-    return email_encoded
-
-email_encoded = email_mapper()
-del interactions['email']
-interactions['user_id'] = email_encoded
-
-# show header
-interactions.head()
-articles.head()
-
-
-### Get top articles
-def get_top_articles(n, df):
-    most_relevant_sorted = df["article_id"].value_counts().iloc[0:n]
-    most_relevant_articles_df = pd.merge(most_relevant_sorted, articles, on="article_id", how="left")["doc_full_name"]
-    return most_relevant_articles_df.to_list()
-
-def get_top_article_ids(n, df):
-    return df["article_id"].value_counts().iloc[0:n]
-
-
-get_top_articles(10, interactions)
-get_top_article_ids(10, interactions)
-
-
-
-### Part 3 User-User Based Collaborative Filtering
-# Create user-item-matrix first
-user_item_matrix = interactions.groupby(["user_id", "article_id"]).agg(lambda x: 1).unstack().fillna(0).droplevel(0, axis = 1)
-
-
-def find_similar_users(user_id, user_item):
-    similarity = {}
-    for user in user_item_matrix.index:
-        similarity[user] = np.dot(user_item_matrix.loc[user_id, :], user_item_matrix.loc[user, :])
-    similarity.pop(user_id)
-    similarity = sorted(similarity.items(), key=lambda x: x[1], reverse=True)
-    most_similar_users = [item[0] for item in similarity]
-    return most_similar_users
-
-find_similar_users(2, )
-
+df_content.drop_duplicates(subset=["article_id"], inplace=True)
