@@ -66,6 +66,35 @@ def create_user_item_matrix(df):
 
 user_item = create_user_item_matrix(df)
 user_item
+
 ### Find similar users
+def find_similar_users(user_id, user_item=user_item):
+    similarity = dict()
+    for user in user_item.index:
+        similarity.update({user: np.dot(user_item.loc[user_id], user_item.loc[user]) })
+    
+    similarity.pop(user_id)
+    sorted_similarity = sorted(similarity.items(), key=lambda kv: kv[1], reverse=True)
+    most_similar_users = [_id[0] for _id in sorted_similarity]
+       
+    return most_similar_users # return a list of the users in order from most to least similar
+
+print("The 10 most similar users to user 1 are: {}".format(find_similar_users(1)[:10]))
+
+
+### 3.  Now that you have a function that provides the most similar users to each user, you will want to use these users to find articles you can recommend. 
+# Complete the functions below to return the articles you would recommend to each user.
+def get_article_names(article_ids, df=df):
+    articles_df = df[df["article_id"].isin(article_ids)]
+    articles_names = articles_df["title"].drop_duplicates().tolist()
+    return articles_names
+
+def get_user_articles(user_id, user_item=user_item):
+    article_ids = user_item.loc[user_id][user_item.loc[user_id] == 1].index.to_list()
+    article_names = get_article_names(article_ids)
+    return article_ids, article_names # return the ids and names
+
+
+
 
 
