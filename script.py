@@ -109,5 +109,23 @@ def get_user_articles(user_id, user_item=user_item):
 
 
 def user_user_recs(user_id, m=10):
-    return recs
+    pass
+
+similar_users = find_similar_users(1)
+
+for user in similar_users[0:10]:
+    print(user)
+
+result = user_item[user_item.index.isin([2, 4])]
+
+similar_ids = []
+
+for col in result.columns:
+    if result[col].iloc[0] == 0 and  result[col].iloc[1] == 1:
+        similar_ids.append(col)
+
+print(similar_ids)
+    
+    
+    
 
