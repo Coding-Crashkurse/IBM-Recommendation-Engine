@@ -109,23 +109,20 @@ def get_user_articles(user_id, user_item=user_item):
 
 
 def user_user_recs(user_id, m=10):
-    pass
-
-similar_users = find_similar_users(1)
-
-for user in similar_users[0:10]:
-    print(user)
-
-result = user_item[user_item.index.isin([2, 4])]
-
-similar_ids = []
-
-for col in result.columns:
-    if result[col].iloc[0] == 0 and  result[col].iloc[1] == 1:
-        similar_ids.append(col)
-
-print(similar_ids)
+    recs = []
+    own_ids, own_articles =  get_user_articles(user_id)
+    most_similar_users = find_similar_users(user_id)
     
-    
-    
+    for user in most_similar_users:
+        article_ids, article_names =  get_user_articles(user)
+        unseen_articles_ids = [x for x in article_ids if x not in own_ids]
+        recs.extend(unseen_articles_ids)
+        if len(recs) >= m:
+            break
+    recs = recs[0:m]
+    return recs
+
+get_article_names(user_user_recs(4, m = 3))
+
+
 
