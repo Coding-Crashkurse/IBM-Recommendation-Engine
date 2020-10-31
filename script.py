@@ -122,7 +122,44 @@ def user_user_recs(user_id, m=10):
     recs = recs[0:m]
     return recs
 
-get_article_names(user_user_recs(4, m = 3))
+get_article_names(user_user_recs(5, m = 3))
+
+### More consistent user_user_recs
+
+def get_top_sorted_users(user_id, df=df, user_item=user_item):
+    neighbor_ids = []
+    similarity = []
+    interactions = []
+    
+    for user in user_item.index:
+        if user is not user_id:
+            neighbor_ids.append(user)
+            similarity.append(np.dot(user_item.loc[user_id], user_item.loc[user]))
+            interactions.append(df[df['user_id']==user].shape[0])
+            
+    neighbors_df = pd.DataFrame({"neighbor_id": neighbor_ids, 'similarity': similarity, "num_interactions": interactions}).sort_values(by=["similarity", "num_interactions"], ascending=False)
+    return neighbors_df
+
+
+def user_user_recs_part2(user_id, m=10):
+    recs = []
+    own_ids, own_articles =  get_user_articles(user_id)
+    
+    top_sorted_users = get_top_sorted_users(4)
+    
+    for user in top_sorted_users.neighbor_id:
+        article_ids, article_names =  get_user_articles(user)
+        unseen_articles_ids = [x for x in article_ids if x not in own_ids]
+        recs.extend(unseen_articles_ids)
+        if len(recs) >= m:
+            break
+    recs = recs[0:m]
+    rec_names = get_article_names(recs)
+    
+    return recs, rec_names  
 
 
 
+
+user_user_recs(2)
+user_user_recs_part2(2)
